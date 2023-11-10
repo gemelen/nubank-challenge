@@ -3,6 +3,7 @@ import sbt._
 object V {
   val cats    = "2.10.0"
   val ce      = "3.5.2"
+  val fs2     = "3.9.3"
   val l4c     = "2.6.0"
   val logback = "1.4.11"
   val circe   = "0.14.6"
@@ -19,6 +20,11 @@ object D {
     "org.typelevel" %% "cats-core"   % V.cats,
     "org.typelevel" %% "cats-effect" % V.ce
   )
+
+  val fs2 = Seq(
+    "co.fs2" %% "fs2-core",
+    "co.fs2" %% "fs2-io"
+  ).map(_ % V.fs2)
 
   val circe = Seq(
     "io.circe" %% "circe-core",

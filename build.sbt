@@ -1,8 +1,15 @@
-import sbt.Keys._
 import D._
+import sbt.Keys._
 
 ThisBuild / scalaVersion := "3.3.1"
 ThisBuild / organization := "dev.nubank.challenge"
+
+ThisBuild / assemblyMergeStrategy := {
+  case "module-info.class" => MergeStrategy.concat
+  case x =>
+    val old = (ThisBuild / assemblyMergeStrategy).value(_)
+    old(x)
+}
 
 lazy val root = project
   .in(file("."))
@@ -10,7 +17,8 @@ lazy val root = project
     name := "challenge",
     libraryDependencies :=
       conf
-      ++ cats
-      ++ circe
-      ++ logging
+        ++ cats
+        ++ circe
+        ++ fs2
+        ++ logging
   )
