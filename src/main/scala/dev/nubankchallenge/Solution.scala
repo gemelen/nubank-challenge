@@ -1,7 +1,6 @@
 package dev.nubankchallenge
 
 import cats.effect._
-import cats.effect.std.Console
 import cats.implicits._
 import dev.nubankchallenge.domain.Tax
 import dev.nubankchallenge.json.InputParser
@@ -13,11 +12,11 @@ import org.typelevel.log4cats.slf4j._
 
 object Solution extends IOApp with InputParser with TaxCalculator {
 
-  implicit val logging: LoggerFactory[IO] = Slf4jFactory[IO]
+  implicit val logging: LoggerFactory[IO] = Slf4jFactory.create[IO]
 
   val logger: SelfAwareStructuredLogger[IO] = LoggerFactory[IO].getLogger
 
-  private def program(rawSession: String): IO[Unit] = {
+  private def calculateTax(rawSession: String): IO[Unit] = {
     val session = this.parse(rawSession)
     val tax     = this.calculate(session)
 
@@ -31,7 +30,7 @@ object Solution extends IOApp with InputParser with TaxCalculator {
         .filter(_.nonEmpty)
 
     input
-      .foreach(program)
+      .foreach(calculateTax)
       .compile
       .drain
       .as(ExitCode.Success)

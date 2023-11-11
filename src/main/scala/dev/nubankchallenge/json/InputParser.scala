@@ -1,7 +1,7 @@
 package dev.nubankchallenge.json
 
 import cats.data.NonEmptyList
-import dev.nubankchallenge.domain._
+import dev.nubankchallenge.domain.Transaction
 import io.circe.Error
 import io.circe.parser.decode
 
