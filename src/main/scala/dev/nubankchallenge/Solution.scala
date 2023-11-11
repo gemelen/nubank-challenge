@@ -1,5 +1,8 @@
 package dev.nubankchallenge
 
+import _root_.io.circe.generic.auto._
+import _root_.io.circe.syntax._
+import cats.data.NonEmptyList
 import cats.effect._
 import cats.implicits._
 import dev.nubankchallenge.domain.Tax
@@ -16,11 +19,11 @@ object Solution extends IOApp with InputParser with TaxCalculator {
 
   val logger: SelfAwareStructuredLogger[IO] = LoggerFactory[IO].getLogger
 
-  private def calculateTax(rawSession: String): IO[Unit] = {
+  private def calculateTax(rawSession: String): NonEmptyList[Tax] = {
     val session = this.parse(rawSession)
     val tax     = this.calculate(session)
 
-    IO.println(tax.show)
+    tax
   }
 
   override def run(args: List[String]): IO[ExitCode] = {
@@ -30,7 +33,8 @@ object Solution extends IOApp with InputParser with TaxCalculator {
         .filter(_.nonEmpty)
 
     input
-      .foreach(calculateTax)
+      .map(calculateTax)
+      .foreach(s => IO.println(s.asJson.noSpaces))
       .compile
       .drain
       .as(ExitCode.Success)
