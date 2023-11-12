@@ -1,12 +1,8 @@
 package dev.nubankchallenge.logic
 
-import cats.data.NonEmptyList
-import dev.nubankchallenge.domain.Tax
-import dev.nubankchallenge.domain.Transaction
+import dev.nubankchallenge.domain._
 
 trait TaxCalculator {
-  def calculate(session: NonEmptyList[Transaction]): NonEmptyList[Tax] = {
-    session
-      .map(_ => Tax(0.0))
-  }
+
+  def calculate(session: List[Transaction]): List[Tax]
 }
