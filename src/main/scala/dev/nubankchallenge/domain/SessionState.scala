@@ -7,6 +7,7 @@ case class SessionState(
 )
 
 object SessionState {
+
   // new-weighted-average-price =
   //    ( (current-stock-quantity * weighted-average-price) + (new-stock-quantity * new-price))
   //    /
@@ -16,6 +17,6 @@ object SessionState {
     val newStock      = in.quantity.value
     val newTotalStock = state.accumulatedStockQuantity.value + in.quantity.value
 
-    (state.weightedAveragePrice * currentStock + in.unitCost.price * newStock) / newTotalStock
+    ((state.weightedAveragePrice * currentStock + in.unitCost.price * newStock) / newTotalStock).setScale(2)
   }
 }

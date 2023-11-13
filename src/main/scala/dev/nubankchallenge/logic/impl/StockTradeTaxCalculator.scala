@@ -7,6 +7,11 @@ import dev.nubankchallenge.logic.TaxCalculator
 
 class StockTradeTaxCalculator(taxExemptionLimit: BigDecimal, taxRate: BigDecimal) extends TaxCalculator {
 
+  sealed trait TransactionResult
+  case object Gain           extends TransactionResult
+  case object Loss           extends TransactionResult
+  case object NorGainNorLoss extends TransactionResult
+
   override def calculate(session: List[Transaction]): List[Tax] = {
     @tailrec
     def loop(session: List[Transaction], state: SessionState, accumulator: List[Tax]): List[Tax] = session match {
@@ -22,7 +27,14 @@ class StockTradeTaxCalculator(taxExemptionLimit: BigDecimal, taxRate: BigDecimal
   }
 
   private def step(in: Transaction, state: SessionState): (SessionState, Tax) = {
-    (in.op, in.unitCost.price < state.weightedAveragePrice) match {
+    val resultDiscriminator = in.unitCost.price - state.weightedAveragePrice
+    val transactionResult = resultDiscriminator match {
+      case rd if rd < 0 => Loss
+      case rd if rd > 0 => Gain
+      case _            => NorGainNorLoss
+    }
+
+    (in.op, transactionResult) match {
       case (Buy, _) =>
         val newState = SessionState(
           accumulatedProfit = state.accumulatedProfit,
@@ -30,28 +42,38 @@ class StockTradeTaxCalculator(taxExemptionLimit: BigDecimal, taxRate: BigDecimal
           weightedAveragePrice = SessionState.recalculateWeightedAverage(in, state)
         )
         val tax = Tax.zero
+        println(s"buy, state: ${newState}, tax: ${tax}")
         (newState, tax)
-      case (Sell, true) =>
-        // sell with loss
-        val lossAmount = in.unitCost.price * in.quantity.value
-        val newState = SessionState(
-          accumulatedProfit = state.accumulatedProfit - lossAmount,
-          accumulatedStockQuantity = Quantity(state.accumulatedStockQuantity.value - in.quantity.value),
-          weightedAveragePrice = state.weightedAveragePrice
-        )
-        val tax = Tax.zero
-        (newState, tax)
-      case (Sell, false) =>
-        // sell with gain
+      case (Sell, Gain) =>
         val gainAmount = in.unitCost.price * in.quantity.value
         val newState = SessionState(
           accumulatedProfit = state.accumulatedProfit + gainAmount,
           accumulatedStockQuantity = Quantity(state.accumulatedStockQuantity.value - in.quantity.value),
-          weightedAveragePrice = state.weightedAveragePrice
+          weightedAveragePrice = SessionState.recalculateWeightedAverage(in, state)
         )
         val tax =
-          if (newState.accumulatedProfit > taxExemptionLimit) { Tax(taxRate * newState.accumulatedProfit) }
+          if (gainAmount > taxExemptionLimit) { Tax(taxRate * newState.accumulatedProfit) }
           else { Tax.zero }
+        println(s"sell with gain, state: ${newState}, tax: ${tax}")
+        (newState, tax)
+      case (Sell, Loss) =>
+        val lossAmount = in.unitCost.price * in.quantity.value
+        val newState = SessionState(
+          accumulatedProfit = state.accumulatedProfit - lossAmount,
+          accumulatedStockQuantity = Quantity(state.accumulatedStockQuantity.value - in.quantity.value),
+          weightedAveragePrice = SessionState.recalculateWeightedAverage(in, state)
+        )
+        val tax = Tax.zero
+        println(s"sell with loss, state: ${newState}, tax: ${tax}")
+        (newState, tax)
+      case (Sell, NorGainNorLoss) =>
+        val newState = SessionState(
+          accumulatedProfit = state.accumulatedProfit,
+          accumulatedStockQuantity = Quantity(state.accumulatedStockQuantity.value - in.quantity.value),
+          weightedAveragePrice = SessionState.recalculateWeightedAverage(in, state)
+        )
+        val tax = Tax.zero
+        println(s"sell without gain or loss, state: ${newState}, tax: ${tax}")
         (newState, tax)
     }
   }

@@ -11,6 +11,11 @@ object V {
   val slf4j   = "2.0.9"
 }
 
+object VT {
+  val munit = "1.0.0-M10"
+  val muce  = "2.0.0-M4"
+}
+
 object D {
   val conf = Seq(
     "com.typesafe" % "config" % V.config
@@ -37,4 +42,11 @@ object D {
     "org.slf4j"      % "slf4j-api"       % V.slf4j,
     "ch.qos.logback" % "logback-classic" % V.logback
   )
+
+  val munit = Seq(
+    "org.scalameta" %% "munit"             % VT.munit,
+    "org.typelevel" %% "munit-cats-effect" % VT.muce
+  ).map(_ % Test)
+
+  val tests = munit
 }

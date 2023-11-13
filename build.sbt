@@ -32,4 +32,5 @@ lazy val root = project
         ++ circe
         ++ fs2
         ++ logging
+        ++ tests
   )
