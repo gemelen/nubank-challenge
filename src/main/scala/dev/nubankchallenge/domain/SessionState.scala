@@ -1,5 +1,8 @@
 package dev.nubankchallenge.domain
 
+import java.math.MathContext
+import java.math.RoundingMode
+
 case class SessionState(
     accumulatedProfit: BigDecimal = BigDecimal.valueOf(0L),
     accumulatedStockQuantity: Quantity = Quantity(),
@@ -7,6 +10,8 @@ case class SessionState(
 )
 
 object SessionState {
+
+  lazy val mc = new MathContext(2, RoundingMode.HALF_EVEN)
 
   // new-weighted-average-price =
   //    ( (current-stock-quantity * weighted-average-price) + (new-stock-quantity * new-price))
@@ -17,6 +22,6 @@ object SessionState {
     val newStock      = in.quantity.value
     val newTotalStock = state.accumulatedStockQuantity.value + in.quantity.value
 
-    ((state.weightedAveragePrice * currentStock + in.unitCost.price * newStock) / newTotalStock).setScale(2)
+    ((state.weightedAveragePrice * currentStock + in.unitCost.price * newStock) / newTotalStock).round(mc)
   }
 }
