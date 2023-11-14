@@ -3,8 +3,11 @@ package dev.nubankchallenge.domain
 import java.math.MathContext
 import java.math.RoundingMode
 
+import cats.Show
+
 case class SessionState(
-    accumulatedProfit: BigDecimal = BigDecimal.valueOf(0L),
+    profit: BigDecimal = BigDecimal.valueOf(0L),
+    revenue: BigDecimal = BigDecimal.valueOf(0L),
     accumulatedStockQuantity: Quantity = Quantity(),
     weightedAveragePrice: BigDecimal = BigDecimal(0L)
 )
@@ -23,5 +26,9 @@ object SessionState {
     val newTotalStock = state.accumulatedStockQuantity.value + in.quantity.value
 
     ((state.weightedAveragePrice * currentStock + in.unitCost.price * newStock) / newTotalStock).round(mc)
+  }
+
+  given showSessionState: Show[SessionState] = Show.show { state =>
+    s"Profit = ${state.profit}, revenue = ${state.revenue}, quantity = ${state.accumulatedStockQuantity.value}, price = ${state.weightedAveragePrice.toLong}"
   }
 }

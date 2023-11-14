@@ -1,13 +1,11 @@
 <configuration>
   <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>[%date] %highlight([%level]) [%logger{10} %file:%line] %msg%n</pattern>
+      <pattern>%msg%n</pattern>
     </encoder>
   </appender>
 
-  <logger name="fs2" level="info"/>
-
-  <root level="trace">
+  <root level="warn">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>

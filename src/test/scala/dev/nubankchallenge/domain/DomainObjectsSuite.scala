@@ -13,7 +13,7 @@ class DomainObjectsSuite extends FunSuite {
 
     val in = Transaction(Buy, UnitCost(BigDecimal(10L)), Quantity(5L))
     val state = SessionState(
-      accumulatedProfit = BigDecimal(100L),
+      profit = BigDecimal(100L),
       accumulatedStockQuantity = Quantity(5L),
       weightedAveragePrice = BigDecimal(20L)
     )
