@@ -26,6 +26,8 @@ lazy val root = project
   .in(file("."))
   .settings(
     name := "challenge",
+    assembly / mainClass := Some("dev.nubankchallenge.Solution"),
+    assembly / assemblyJarName := "nubankchallenge.jar",
     libraryDependencies :=
       conf
         ++ cats

@@ -22,17 +22,15 @@ object Solution extends IOApp with InputParser {
     tax
   }
 
+  private def program(in: Stream[IO, String]): Stream[IO, Unit] =
+    in.map(calculateTax).foreach(s => IO.println(s.asJson.noSpaces))
+
   override def run(args: List[String]): IO[ExitCode] = {
     val input =
       stdinUtf8[IO](1024)
         .repartition(s => Chunk.array(s.split("\n", -1)))
         .filter(_.nonEmpty)
 
-    input
-      .map(calculateTax)
-      .foreach(s => IO.println(s.asJson.noSpaces))
-      .compile
-      .drain
-      .as(ExitCode.Success)
+    program(input).compile.drain.as(ExitCode.Success)
   }
 }
